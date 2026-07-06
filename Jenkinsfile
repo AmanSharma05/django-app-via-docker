@@ -1,29 +1,46 @@
-@Library('Shared')_
+@Library("shared") _
 pipeline{
-    agent { label 'dev-server'}
     
+    agent { label "Aman"}
     stages{
-        stage("Code clone"){
+        stage("Hello"){
             steps{
-                sh "whoami"
-            clone("https://github.com/AmanSharma05/django-app-via-docker.git","main")
+                script{
+                    hello()
+                }
             }
         }
-        stage("Code Build"){
+        stage("Code"){
             steps{
-            dockerbuild("notes-app","latest")
+                script{
+                    clone("https://github.com/AmanSharma05/django-app-via-docker.git", "main")
+                }
+            }
+        }
+        stage("Build"){
+            steps{
+                script{
+                    docker_build("notes-app", "latest", "amansharma0511")
+                }
             }
         }
         stage("Push to DockerHub"){
             steps{
-                dockerpush("dockerHubCreds","notes-app","latest")
+                script{
+                    docker_push("notes-app", "latest", "amansharma0511")
+                }
             }
         }
         stage("Deploy"){
             steps{
-                deploy()
+                sh '''
+                pwd
+                docker compose down
+                docker compose pull
+                docker compose up -d
+                docker compose ps
+                '''
             }
         }
-        
     }
 }
